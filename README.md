@@ -1,6 +1,7 @@
 # I WANT TO EAT 🍲
 
-![Project Banner](images/banner.png) 
+![I WANT TO EAT Banner](https://imgur.com/undefined)
+
 
 ## Table of Contents
 - [I WANT TO EAT 🍲](#i-want-to-eat-)
@@ -8,15 +9,7 @@
   - [Introduction](#introduction)
   - [Goal](#goal)
   - [Features](#features)
-  - [Implementation](#implementation)
-    - [Technologies Used](#technologies-used)
-    - [Project Structure](#project-structure)
-    - [Setup and Installation](#setup-and-installation)
-    - [Running the Application](#running-the-application)
-  - [Usage](#usage)
-  - [Contributing](#contributing)
-  - [License](#license)
-  - [Contact](#contact)
+
 
 ## Introduction
 
