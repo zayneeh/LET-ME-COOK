@@ -5,6 +5,7 @@
 
 ## Table of Contents
 - [I WANT TO EAT 🍲](#i-want-to-eat-)
+  - [Table of Contents](#table-of-contents-)
   - [Introduction](#introduction)
   - [Goal](#goal)
   - [Features](#features)
