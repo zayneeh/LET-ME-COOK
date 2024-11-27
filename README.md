@@ -17,7 +17,7 @@
 
 ## Goal
 
-The primary goal of ** LET ME COOK** is to bridge the gap between available ingredients and meal preparation. By inputting the ingredients you possess, the application intelligently recommends Nigerian recipes that you can create without the need for additional shopping. This not only promotes efficient use of resources but also encourages exploring the rich and diverse flavors of Nigerian cuisine.
+The primary goal of **LET ME COOK** is to bridge the gap between available ingredients and meal preparation. By inputting the ingredients you possess, the application intelligently recommends Nigerian recipes that you can create without the need for additional shopping. This not only promotes efficient use of resources but also encourages exploring the rich and diverse flavors of Nigerian cuisine.
 
 ## Features
 
