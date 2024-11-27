@@ -1,6 +1,6 @@
 # I WANT TO EAT 🍲
 
-![I WANT TO EAT Banner](https://imgur.com/a/CCdJkJu)
+![I WANT TO EAT Banner](https://github.com/zayneeh/I-Want-To-Cook/blob/main/20241021_212349.jpg)
 
 
 ## Table of Contents
