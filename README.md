@@ -1,6 +1,6 @@
 # I WANT TO EAT 🍲
 
-![I WANT TO EAT Banner](https://imgur.com/undefined)
+![I WANT TO EAT Banner](https://imgur.com/a/CCdJkJu)
 
 
 ## Table of Contents
