@@ -17,26 +17,44 @@ def get_recipes(ingredients):
     filtered_recipes = recipes[recipes['ingredients'].apply(lambda x: all(ingredient in x.lower() for ingredient in ingredients))]
     return filtered_recipes
 
+def get_recipes_by_food_name(food_name):
+    food_name = [food_name.strip().lower() for food in food_name.split(',')]
+    filtered_recipes = recipes[recipes['food_name'].apply(lambda x: all(food in x.lower() for food in food_name))]
+    return filtered_recipes
+
+
 # Streamlit interface
 def main():
     st.title('LET ME COOK')
     st.header('Discover Delicious Nigerian Recipes')
-    
-    # User inputs their ingredients
-    user_ingredients = st.text_input("Let's find what you can cook!Enter the ingredients you have separated by commas:")
-    
-    if st.button('Find Recipes'):
-        if user_ingredients:
-            result = get_recipes(user_ingredients)
-            if not result.empty:
-                for index, row in result.iterrows():
-                    st.subheader(row['food_name'])  # Recipe name
-                    st.text('Ingredients: ' + row['ingredients'])
-                    st.text('Instructions: ' + row['procedures'])
+
+    search_option = st.radio("Search by:", ('Ingredients', 'Food Name'))
+
+    if search_option == 'Ingredients':
+        user_input = st.text_input('Enter your ingredients, separated by commas:')
+        if st.button('Find Recipes by Ingredients'):
+            if user_input:
+                result = get_recipes(user_input)
+                display_recipes(result)
             else:
-                st.write("No recipes found that match the given ingredients.")
-        else:
-            st.write("Please enter some ingredients to search for recipes.")
+                st.write("Please enter some ingredients to search for recipes.")
+    elif search_option == 'Food Name':
+        user_input = st.text_input('Enter a food name:')
+        if st.button('Find Recipes by Food Name'):
+            if user_input:
+                result = get_recipes_by_food_name(user_input)
+                display_recipes(result)
+            else:
+                st.write("Please enter a food name to search for recipes.")
+
+def display_recipes(recipes):
+    if recipes.empty:
+        st.write("No recipes found.")
+    else:
+        for index, row in recipes.iterrows():
+            st.subheader(row['food_name'])
+            st.write('Ingredients: ' + row['ingredients'])
+            st.write('Instructions: ' + row['procedures'])
 
 st.markdown("""
 <style>
