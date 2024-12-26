@@ -14,7 +14,7 @@
 
 ## Introduction
 
-**LET ME COOK** is  designed to help users discover delicious Nigerian recipes based on the ingredients they have available.  It simplifies meal planning by providing tailored recipe suggestions, ensuring you make the most out of your pantry.
+**LET ME COOK** is  designed to help users discover delicious Nigerian recipes based on the ingredients they have available.  It simplifies meal planning by providing tailored recipe suggestions, ensuring you make the most out of your pantry. You can test it out on this link(https://atze3ds2un6celhafdnj7s.streamlit.app/)
 
 ## Goal
 
