@@ -9,7 +9,7 @@ def load_data(filename):
     data.columns = [col.strip().lower() for col in data.columns] 
     return data
 
-recipes = load_data('C:\\Users\\HP\\Desktop\\SAMPLE\\LET ME COOK\\Nigerian Palatable meals.csv')
+recipes = load_data('Nigerian Palatable meals - Sheet1.csv')
 
 # Function to filter recipes based on ingredients
 def get_recipes(ingredients):
