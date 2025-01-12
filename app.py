@@ -5,7 +5,7 @@ import pandas as pd
 image_url = 'https://raw.githubusercontent.com/zayneeh/LET-ME-COOK/main/20241021_212349.jpg'
 
 # Display the image in Streamlit
-st.image(image_url, caption='Nigerian Fried Rice', width =250)
+st.image(image_url, caption='Nigerian Fried Rice', width =350)
 
 
 # Load the CSV data into a DataFrame
@@ -29,39 +29,41 @@ def get_recipes_by_food_name(food_name):
     filtered_recipes = recipes[recipes['food_name'].apply(lambda x: all(food in x.lower() for food in food_name))]
     return filtered_recipes
 
-
 # Streamlit interface
 def main():
     st.title('LET ME COOK')
     st.header('Discover Delicious Nigerian Recipes')
 
     search_option = st.radio("Search by:", ('Ingredients', 'Food Name'))
-    user_input = st.text_input('Enter ingredients separated by commas or a food name.')
 
-    if st.button('Find Recipes'):
-        if user_input:
-            if search_option == 'Ingredients':
+    if search_option == 'Ingredients':
+        user_input = st.text_input('Enter your ingredients, separated by commas:')
+        if st.button('Find Recipes by Ingredients'):
+            if user_input:
                 result = get_recipes(user_input)
-                if result.empty:
-                    st.write("No recipes found based on the ingredients provided.")
-                else:
-                    display_recipes(result)
-            elif search_option == 'Food Name':
+                display_recipes(result)
+            else:
+                st.write("Please enter some ingredients to search for recipes.")
+    elif search_option == 'Food Name':
+        user_input = st.text_input('Enter a food name:')
+        if st.button('Find Recipes by Food Name'):
+            if user_input:
                 result = get_recipes_by_food_name(user_input)
-                if result.empty:
-                    st.write("No recipes found with that food name.")
-                else:
-                    display_recipes(result)
-        else:
-            st.write("Please enter some input to search for recipes.")
+                display_recipes(result)
+            else:
+                st.write("Please enter a food name to search for recipes.")
 
-def display_recipe(recipe):
-     if recipes.empty:
+        
+def display_recipes(recipes):
+    if recipes.empty:
         st.write("No recipes found.")
-     else:
+    else:
         for index, row in recipes.iterrows():
             st.subheader(row['food_name'])
             st.write('Ingredients: ' + row['ingredients'])
+            st.write('Instructions: ' + row['procedures'])
+
+
 
 st.markdown("""
 <style>
@@ -95,4 +97,5 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 st.markdown('<p class="footer">Made with ❤️ by Zainab</p>', unsafe_allow_html=True)
+
 
