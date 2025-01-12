@@ -58,7 +58,7 @@ def main():
 def display_recipe(recipe):
      if recipes.empty:
         st.write("No recipes found.")
-    else:
+     else:
         for index, row in recipes.iterrows():
             st.subheader(row['food_name'])
             st.write('Ingredients: ' + row['ingredients'])
