@@ -1,5 +1,11 @@
 import streamlit as st
-import pandas as pd
+import pandas as pdfrom pydub import AudioSegment
+from pydub.playback import play
+import os
+
+# Display an image
+image_path = 'path_to_your_image.jpg'  # Update this path
+st.image(image_path, caption='Streamlit is awesome!')
 
 
 # Load the CSV data into a DataFrame
@@ -16,11 +22,21 @@ def get_recipes(ingredients):
     ingredients = [ingredient.strip().lower() for ingredient in ingredients.split(',')]
     filtered_recipes = recipes[recipes['ingredients'].apply(lambda x: all(ingredient in x.lower() for ingredient in ingredients))]
     return filtered_recipes
-
+    
+#Function to filter recipes based on food-name
 def get_recipes_by_food_name(food_name):
     food_name = [food_name.strip().lower() for food in food_name.split(',')]
     filtered_recipes = recipes[recipes['food_name'].apply(lambda x: all(food in x.lower() for food in food_name))]
     return filtered_recipes
+
+# Function to play text as speech
+def text_to_speech(text):
+    tts = gTTS(text=text, lang='en')
+    filename = 'temp.mp3'
+    tts.save(filename)
+    audio = AudioSegment.from_mp3(filename)
+    play(audio)
+    os.remove(filename)  # Clean up the temporary file
 
 
 # Streamlit interface
@@ -29,6 +45,7 @@ def main():
     st.header('Discover Delicious Nigerian Recipes')
 
     search_option = st.radio("Search by:", ('Ingredients', 'Food Name'))
+    
 
     if search_option == 'Ingredients':
         user_input = st.text_input('Enter your ingredients, separated by commas:')
@@ -46,7 +63,9 @@ def main():
                 display_recipes(result)
             else:
                 st.write("Please enter a food name to search for recipes.")
-
+    # Button to trigger speech
+    if st.button('Listen to Recipe'): text_to_speech(result)
+        
 def display_recipes(recipes):
     if recipes.empty:
         st.write("No recipes found.")
