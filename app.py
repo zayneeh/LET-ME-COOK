@@ -62,13 +62,24 @@ def display_recipe(recipe):
     st.write('Instructions: ' + recipe['procedures'])
 
 def text_to_speech(recipe):
-    recipe_text = f"{recipe['food_name']}. Ingredients: {recipe['ingredients']}. Instructions: {recipe['procedures']}"
-    tts = gTTS(text=recipe_text, lang='en')
-    tts.save('recipe.mp3')
-    audio_file = open('recipe.mp3', 'rb')
-    audio_bytes = audio_file.read()
-    st.audio(audio_bytes, format='audio/mp3', start_time=0)
-    os.remove('recipe.mp3')  # Clean up the file after playing
+    try:
+        # Debug: Print or log the recipe content to be spoken
+        st.write("Debug - Recipe Text:", recipe['procedures'])  # Remove in production
+
+        recipe_text = f"{recipe['food_name']}. Ingredients: {recipe['ingredients']}. Instructions: {recipe['procedures']}"
+        if not recipe_text.strip():  # Check if the recipe text is not just empty or whitespace
+            st.error("The recipe text is empty. Cannot generate speech.")
+            return
+
+        tts = gTTS(text=recipe_text, lang='en')
+        tts.save('recipe.mp3')
+        audio_file = open('recipe.mp3', 'rb')
+        audio_bytes = audio_file.read()
+        st.audio(audio_bytes, format='audio/mp3')
+        os.remove('recipe.mp3')  # Clean up the file after playing
+    except Exception as e:
+        st.error(f"Failed to generate audio: {e}")
+
 
 st.markdown("""
 <style>
