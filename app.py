@@ -5,7 +5,7 @@ import pandas as pd
 image_url = 'https://raw.githubusercontent.com/zayneeh/LET-ME-COOK/main/20241021_212349.jpg'
 
 # Display the image in Streamlit
-st.image(image_url, caption='Nigerian Fried Rice')
+st.image(image_url, caption='Nigerian Fried Rice', width =250)
 
 
 # Load the CSV data into a DataFrame
@@ -56,10 +56,12 @@ def main():
             st.write("Please enter some input to search for recipes.")
 
 def display_recipe(recipe):
-    st.subheader(recipe['food_name'])
-    st.write('Ingredients: ' + recipe['ingredients'])
-    st.write('Instructions: ' + recipe['procedures'])
-
+     if recipes.empty:
+        st.write("No recipes found.")
+    else:
+        for index, row in recipes.iterrows():
+            st.subheader(row['food_name'])
+            st.write('Ingredients: ' + row['ingredients'])
 
 st.markdown("""
 <style>
