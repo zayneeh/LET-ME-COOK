@@ -1,7 +1,5 @@
 import streamlit as st
-import pandas as pdfrom pydub import AudioSegment
-from pydub.playback import play
-import os
+
 
 # Display an image
 image_path = 'https://github.com/zayneeh/I-Want-To-Cook/blob/main/20241021_212349.jpg'  
@@ -28,15 +26,6 @@ def get_recipes_by_food_name(food_name):
     food_name = [food_name.strip().lower() for food in food_name.split(',')]
     filtered_recipes = recipes[recipes['food_name'].apply(lambda x: all(food in x.lower() for food in food_name))]
     return filtered_recipes
-
-# Function to play text as speech
-def text_to_speech(text):
-    tts = gTTS(text=text, lang='en')
-    filename = 'temp.mp3'
-    tts.save(filename)
-    audio = AudioSegment.from_mp3(filename)
-    play(audio)
-    os.remove(filename)  # Clean up the temporary file
 
 
 # Streamlit interface
