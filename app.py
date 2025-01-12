@@ -1,10 +1,5 @@
 import streamlit as st
 import pandas as pd
-from PIL import Image
-
-# Display an image
-image  =  Image.open('https://github.com/zayneeh/LET-ME-COOK/blob/main/20241021_212349.jpg' )
-st.image(image_path, caption='Nigerian Fried Rice')
 
 
 # Load the CSV data into a DataFrame
