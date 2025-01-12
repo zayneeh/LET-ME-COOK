@@ -5,7 +5,7 @@ import pandas as pd
 image_url = 'https://raw.githubusercontent.com/zayneeh/LET-ME-COOK/main/20241021_212349.jpg'
 
 # Display the image in Streamlit
-st.image(image_url, caption='Nigerian Fried Rice', width =350)
+st.image(image_url, caption='Nigerian Fried Rice', width =150)
 
 
 # Load the CSV data into a DataFrame
