@@ -1,8 +1,10 @@
 import streamlit as st
+from gtts import gTTS
+import os
 
 
 # Display an image
-image_path = 'https://github.com/zayneeh/I-Want-To-Cook/blob/main/20241021_212349.jpg'  
+image_path = 'https://github.com/zayneeh/LET-ME-COOK/blob/main/20241021_212349.jpg'  
 st.image(image_path, caption='Nigerian Fried Rice')
 
 
@@ -53,7 +55,9 @@ def main():
             else:
                 st.write("Please enter a food name to search for recipes.")
     # Button to trigger speech
-    if st.button('Listen to Recipe'): text_to_speech(result)
+    if 'result' in locals() and not result.empty and st.button('Listen to Recipe'):
+        text_to_speech(result)
+
         
 def display_recipes(recipes):
     if recipes.empty:
@@ -63,6 +67,21 @@ def display_recipes(recipes):
             st.subheader(row['food_name'])
             st.write('Ingredients: ' + row['ingredients'])
             st.write('Instructions: ' + row['procedures'])
+
+
+def text_to_speech(recipes):
+    # Combine all recipes into a single string to read out
+    all_recipes_text = ""
+    for index, row in recipes.iterrows():
+        recipe_text = f"{row['food_name']}. Ingredients: {row['ingredients']}. "
+        all_recipes_text += recipe_text
+
+    tts = gTTS(text=all_recipes_text, lang='en')
+    tts.save('recipe.mp3')
+    audio_file = open('recipe.mp3', 'rb')
+    audio_bytes = audio_file.read()
+    st.audio(audio_bytes, format='audio/mp3', start_time=0)
+    os.remove('recipe.mp3')  # Clean up the file after playing
 
 st.markdown("""
 <style>
