@@ -1,6 +1,12 @@
 import streamlit as st
 import pandas as pd
 
+# URL to the raw image content on GitHub
+image_url = 'https://raw.githubusercontent.com/zayneeh/LET-ME-COOK/main/20241021_212349.jpg'
+
+# Display the image in Streamlit
+st.image(image_url, caption='Nigerian Fried Rice')
+
 
 # Load the CSV data into a DataFrame
 @st.cache_data  # This decorator caches the data to prevent reloading on every interaction
@@ -36,13 +42,16 @@ def main():
         if user_input:
             if search_option == 'Ingredients':
                 result = get_recipes(user_input)
-            else:
-                st.write("No recipes found.")
-                
-            if search_option == 'Food Name':
+                if result.empty:
+                    st.write("No recipes found based on the ingredients provided.")
+                else:
+                    display_recipes(result)
+            elif search_option == 'Food Name':
                 result = get_recipes_by_food_name(user_input)
-            else:
-                st.write("No recipes found.")
+                if result.empty:
+                    st.write("No recipes found with that food name.")
+                else:
+                    display_recipes(result)
         else:
             st.write("Please enter some input to search for recipes.")
 
