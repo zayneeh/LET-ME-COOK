@@ -4,8 +4,8 @@ from pydub.playback import play
 import os
 
 # Display an image
-image_path = 'path_to_your_image.jpg'  # Update this path
-st.image(image_path, caption='Streamlit is awesome!')
+image_path = 'https://github.com/zayneeh/I-Want-To-Cook/blob/main/20241021_212349.jpg'  
+st.image(image_path, caption='Nigerian Fried Rice')
 
 
 # Load the CSV data into a DataFrame
