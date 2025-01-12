@@ -37,6 +37,9 @@ def main():
             if search_option == 'Ingredients':
                 result = get_recipes(user_input)
             else:
+                st.write("No recipes found.")
+                
+            if search_option == 'Food Name':
                 result = get_recipes_by_food_name(user_input)
             else:
                 st.write("No recipes found.")
