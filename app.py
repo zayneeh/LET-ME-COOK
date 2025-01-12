@@ -37,47 +37,33 @@ def main():
     st.header('Discover Delicious Nigerian Recipes')
 
     search_option = st.radio("Search by:", ('Ingredients', 'Food Name'))
-    
+    user_input = st.text_input('Enter your query:', help='Enter ingredients separated by commas or a food name.')
 
-    if search_option == 'Ingredients':
-        user_input = st.text_input('Enter your ingredients, separated by commas:')
-        if st.button('Find Recipes by Ingredients'):
-            if user_input:
+    if st.button('Find Recipes'):
+        if user_input:
+            if search_option == 'Ingredients':
                 result = get_recipes(user_input)
-                display_recipes(result)
             else:
-                st.write("Please enter some ingredients to search for recipes.")
-    elif search_option == 'Food Name':
-        user_input = st.text_input('Enter a food name:')
-        if st.button('Find Recipes by Food Name'):
-            if user_input:
                 result = get_recipes_by_food_name(user_input)
-                display_recipes(result)
+            if not result.empty:
+                recipe_choice = st.selectbox('Select a recipe to listen to:', result['food_name'].tolist())
+                selected_recipe = result[result['food_name'] == recipe_choice].iloc[0]
+                display_recipe(selected_recipe)
+                if st.button('Listen to Recipe'):
+                    text_to_speech(selected_recipe)
             else:
-                st.write("Please enter a food name to search for recipes.")
-    # Button to trigger speech
-    if 'result' in locals() and not result.empty and st.button('Listen to Recipe'):
-        text_to_speech(result)
+                st.write("No recipes found.")
+        else:
+            st.write("Please enter some input to search for recipes.")
 
-        
-def display_recipes(recipes):
-    if recipes.empty:
-        st.write("No recipes found.")
-    else:
-        for index, row in recipes.iterrows():
-            st.subheader(row['food_name'])
-            st.write('Ingredients: ' + row['ingredients'])
-            st.write('Instructions: ' + row['procedures'])
+def display_recipe(recipe):
+    st.subheader(recipe['food_name'])
+    st.write('Ingredients: ' + recipe['ingredients'])
+    st.write('Instructions: ' + recipe['procedures'])
 
-
-def text_to_speech(recipes):
-    # Combine all recipes into a single string to read out
-    all_recipes_text = ""
-    for index, row in recipes.iterrows():
-        recipe_text = f"{row['food_name']}. Ingredients: {row['ingredients']}. "
-        all_recipes_text += recipe_text
-
-    tts = gTTS(text=all_recipes_text, lang='en')
+def text_to_speech(recipe):
+    recipe_text = f"{recipe['food_name']}. Ingredients: {recipe['ingredients']}. Instructions: {recipe['procedures']}"
+    tts = gTTS(text=recipe_text, lang='en')
     tts.save('recipe.mp3')
     audio_file = open('recipe.mp3', 'rb')
     audio_bytes = audio_file.read()
