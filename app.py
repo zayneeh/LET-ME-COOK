@@ -1,11 +1,9 @@
 import streamlit as st
 import pandas as pd
-from gtts import gTTS
-import os
-
+from PIL import Image
 
 # Display an image
-image_path = 'https://github.com/zayneeh/LET-ME-COOK/blob/main/20241021_212349.jpg'  
+image  =  Image.open('https://github.com/zayneeh/LET-ME-COOK/blob/main/20241021_212349.jpg' )
 st.image(image_path, caption='Nigerian Fried Rice')
 
 
@@ -37,7 +35,7 @@ def main():
     st.header('Discover Delicious Nigerian Recipes')
 
     search_option = st.radio("Search by:", ('Ingredients', 'Food Name'))
-    user_input = st.text_input('Enter your query:', help='Enter ingredients separated by commas or a food name.')
+    user_input = st.text_input('Enter ingredients separated by commas or a food name.')
 
     if st.button('Find Recipes'):
         if user_input:
@@ -45,12 +43,6 @@ def main():
                 result = get_recipes(user_input)
             else:
                 result = get_recipes_by_food_name(user_input)
-            if not result.empty:
-                recipe_choice = st.selectbox('Select a recipe to listen to:', result['food_name'].tolist())
-                selected_recipe = result[result['food_name'] == recipe_choice].iloc[0]
-                display_recipe(selected_recipe)
-                if st.button('Listen to Recipe'):
-                    text_to_speech(selected_recipe)
             else:
                 st.write("No recipes found.")
         else:
@@ -60,25 +52,6 @@ def display_recipe(recipe):
     st.subheader(recipe['food_name'])
     st.write('Ingredients: ' + recipe['ingredients'])
     st.write('Instructions: ' + recipe['procedures'])
-
-def text_to_speech(recipe):
-    try:
-        # Debug: Print or log the recipe content to be spoken
-        st.write("Debug - Recipe Text:", recipe['procedures'])  # Remove in production
-
-        recipe_text = f"{recipe['food_name']}. Ingredients: {recipe['ingredients']}. Instructions: {recipe['procedures']}"
-        if not recipe_text.strip():  # Check if the recipe text is not just empty or whitespace
-            st.error("The recipe text is empty. Cannot generate speech.")
-            return
-
-        tts = gTTS(text=recipe_text, lang='en')
-        tts.save('recipe.mp3')
-        audio_file = open('recipe.mp3', 'rb')
-        audio_bytes = audio_file.read()
-        st.audio(audio_bytes, format='audio/mp3')
-        os.remove('recipe.mp3')  # Clean up the file after playing
-    except Exception as e:
-        st.error(f"Failed to generate audio: {e}")
 
 
 st.markdown("""
