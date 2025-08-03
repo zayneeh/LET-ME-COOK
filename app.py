@@ -21,21 +21,15 @@ def load_data(filename):
 
 recipes_df = load_data('Nigerian Palatable meals - Sheet1.csv')
 
-# Load sentence-transformer model
-@st.cache_resource
-def load_model():
-    return SentenceTransformer("paraphrase-MiniLM-L3-v2")
-
-model = load_model()
-
-# Cache recipe embeddings
+# Cache recipe embeddings and model
 @st.cache_data
-def get_recipe_embeddings(df, model):
+def get_recipe_embeddings(df):
+    model = SentenceTransformer("paraphrase-MiniLM-L3-v2")
     ingredient_texts = df['ingredients'].str.replace("\r\n", ", ").str.lower().tolist()
     embeddings = model.encode(ingredient_texts)
-    return embeddings
+    return embeddings, model
 
-recipe_embeddings = get_recipe_embeddings(recipes_df, model)
+recipe_embeddings, model = get_recipe_embeddings(recipes_df)
 
 # Semantic recommendation
 def semantic_recipe_recommendation(user_input, df, recipe_embeddings, threshold=0.7):
@@ -127,6 +121,7 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 st.markdown('<p class="footer">Made with ❤️ by Zainab</p>', unsafe_allow_html=True)
+
 
 
 
