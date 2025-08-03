@@ -5,46 +5,49 @@ from sklearn.metrics.pairwise import cosine_similarity
 import numpy as np
 import warnings
 
-# Suppress future warnings
 warnings.filterwarnings("ignore", category=FutureWarning)
 
-# Show header image
+# Show image
 image_url = 'https://raw.githubusercontent.com/zayneeh/LET-ME-COOK/main/20241021_212349.jpg'
 st.image(image_url, caption='Nigerian Fried Rice', width=150)
 
-# Load CSV file
+# Load data
 @st.cache_data
 def load_data(filename):
-    data = pd.read_csv(filename)
-    data.columns = [col.strip().lower() for col in data.columns]
-    return data
+    df = pd.read_csv(filename)
+    df.columns = [col.strip().lower() for col in df.columns]
+    # Combine fields for better prompt matching
+    df["combined"] = df["food_name"].fillna('') + ", " + \
+                     df["ingredients"].fillna('').str.replace("\r\n", ", ") + ", " + \
+                     df["procedures"].fillna('')
+    df["combined"] = df["combined"].str.lower()
+    return df
 
 recipes_df = load_data('Nigerian Palatable meals - Sheet1.csv')
 
-# Cache recipe embeddings and model
+# Cache model and embeddings
 @st.cache_data
-def get_recipe_embeddings(df):
+def get_embeddings(df):
     model = SentenceTransformer("paraphrase-MiniLM-L3-v2")
-    ingredient_texts = df['ingredients'].str.replace("\r\n", ", ").str.lower().tolist()
-    embeddings = model.encode(ingredient_texts)
+    embeddings = model.encode(df["combined"].tolist())
     return embeddings, model
 
-recipe_embeddings, model = get_recipe_embeddings(recipes_df)
+recipe_embeddings, model = get_embeddings(recipes_df)
 
-# Semantic recommendation
-def semantic_recipe_recommendation(user_input, df, recipe_embeddings, threshold=0.7):
+# Semantic recommendation (prompt/ingredient match)
+def semantic_recipe_recommendation(user_input, embeddings, threshold=0.7):
     user_vec = model.encode([user_input.strip().lower()])[0]
-    similarities = cosine_similarity([user_vec], recipe_embeddings)[0]
+    similarities = cosine_similarity([user_vec], embeddings)[0]
     matches = [(i, sim) for i, sim in enumerate(similarities) if sim >= threshold]
-    results = df.iloc[[i for i, _ in matches]]
+    results = recipes_df.iloc[[i for i, _ in matches]]
     return results.sort_values(by='food_name')
 
-# Food name matching
+# Food name match
 def get_recipes_by_food_name(food_name):
     food_name = [f.strip().lower() for f in food_name.split(',')]
     return recipes_df[recipes_df['food_name'].apply(lambda x: all(f in x.lower() for f in food_name))]
 
-# Display recipes
+# Display results
 def display_recipes(recipes):
     if recipes.empty:
         st.write("No recipes found.")
@@ -55,7 +58,7 @@ def display_recipes(recipes):
             st.write('Instructions: ' + row['procedures'])
             st.markdown('---')
 
-# Streamlit interface
+# UI
 def main():
     st.title('LET ME COOK')
     st.header('Discover Delicious Nigerian Recipes')
@@ -63,31 +66,34 @@ def main():
     search_option = st.radio("Search by:", ('Ingredients', 'Food Name', 'Prompt/Description'))
 
     if search_option == 'Ingredients':
-        user_input = st.text_input('Enter ingredients (e.g., "rice, tomato, pepper")')
+        st.caption("Type a list of ingredients separated by commas. For example: rice, tomato, pepper, onions")
+        user_input = st.text_input('Enter ingredients')
         if st.button('Find Recipes by Ingredients'):
             if user_input:
-                with st.spinner("Searching for recipes..."):
-                    result = semantic_recipe_recommendation(user_input, recipes_df, recipe_embeddings)
+                with st.spinner("Searching..."):
+                    result = semantic_recipe_recommendation(user_input, recipe_embeddings)
                 display_recipes(result)
             else:
-                st.write("Please enter some ingredients.")
+                st.warning("Please enter some ingredients.")
+
     elif search_option == 'Food Name':
-        user_input = st.text_input('Enter a food name (e.g., "Fried Rice")')
+        user_input = st.text_input('Enter a food name (e.g., "Jollof Rice")')
         if st.button('Find Recipes by Food Name'):
             if user_input:
                 result = get_recipes_by_food_name(user_input)
                 display_recipes(result)
             else:
-                st.write("Please enter a food name.")
+                st.warning("Please enter a food name.")
+
     elif search_option == 'Prompt/Description':
-        user_input = st.text_input('Describe what you want (e.g., "a spicy rice dish with vegetables")')
+        user_input = st.text_input('Describe what you want (e.g., "spicy rice dish with chicken")')
         if st.button('Find Recipes from Prompt'):
             if user_input:
-                with st.spinner("Finding matches..."):
-                    result = semantic_recipe_recommendation(user_input, recipes_df, recipe_embeddings)
+                with st.spinner("Matching your prompt..."):
+                    result = semantic_recipe_recommendation(user_input, recipe_embeddings)
                 display_recipes(result)
             else:
-                st.write("Please enter a description or prompt.")
+                st.warning("Please enter a prompt or description.")
 
 # Styling
 st.markdown("""
@@ -121,6 +127,7 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 st.markdown('<p class="footer">Made with ❤️ by Zainab</p>', unsafe_allow_html=True)
+
 
 
 
