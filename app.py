@@ -28,7 +28,7 @@ def get_recipes_by_ingredients(user_ingredients):
 
         match_ratio = len(matched) / len(user_ingredients)
 
-        if match_ratio >= 0.9:
+        if match_ratio >= 0.7:
             results.append(row)
 
     return pd.DataFrame(results)
