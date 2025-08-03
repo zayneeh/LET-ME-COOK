@@ -1,59 +1,41 @@
 import streamlit as st
 import pandas as pd
+from sentence_transformers import SentenceTransformer
+from sklearn.metrics.pairwise import cosine_similarity
+import numpy as np
 
 # URL to the raw image content on GitHub
 image_url = 'https://raw.githubusercontent.com/zayneeh/LET-ME-COOK/main/20241021_212349.jpg'
 
 # Display the image in Streamlit
-st.image(image_url, caption='Nigerian Fried Rice', width =150)
-
+st.image(image_url, caption='Nigerian Fried Rice', width=150)
 
 # Load the CSV data into a DataFrame
-@st.cache_data  # This decorator caches the data to prevent reloading on every interaction
+@st.cache_data
 def load_data(filename):
     data = pd.read_csv(filename)
-    data.columns = [col.strip().lower() for col in data.columns] 
+    data.columns = [col.strip().lower() for col in data.columns]
+    data['combined_text'] = data['ingredients'] + ' ' + data['procedures']
     return data
 
+# Load embeddings
+@st.cache_data
+def load_embeddings(text_data):
+    model = SentenceTransformer('all-MiniLM-L6-v2')
+    embeddings = model.encode(text_data.tolist())
+    return model, embeddings
+
 recipes = load_data('Nigerian Palatable meals - Sheet1.csv')
+model, recipe_embeddings = load_embeddings(recipes['combined_text'])
 
-# Function to filter recipes based on ingredients
-def get_recipes(ingredients):
-    ingredients = [ingredient.strip().lower() for ingredient in ingredients.split(',')]
-    filtered_recipes = recipes[recipes['ingredients'].apply(lambda x: all(ingredient in x.lower() for ingredient in ingredients))]
-    return filtered_recipes
-    
-#Function to filter recipes based on food-name
-def get_recipes_by_food_name(food_name):
-    food_name = [food_name.strip().lower() for food in food_name.split(',')]
-    filtered_recipes = recipes[recipes['food_name'].apply(lambda x: all(food in x.lower() for food in food_name))]
-    return filtered_recipes
+# Function to recommend recipes based on semantic similarity
+def recommend_recipes(user_input, model, embeddings, df, top_k=5):
+    user_embedding = model.encode([user_input])[0]
+    similarities = cosine_similarity([user_embedding], embeddings)[0]
+    top_indices = similarities.argsort()[-top_k:][::-1]
+    return df.iloc[top_indices], similarities[top_indices]
 
-# Streamlit interface
-def main():
-    st.title('LET ME COOK')
-    st.header('Discover Delicious Nigerian Recipes')
-
-    search_option = st.radio("Search by:", ('Ingredients', 'Food Name'))
-
-    if search_option == 'Ingredients':
-        user_input = st.text_input('Enter your ingredients, separated by commas:')
-        if st.button('Find Recipes by Ingredients'):
-            if user_input:
-                result = get_recipes(user_input)
-                display_recipes(result)
-            else:
-                st.write("Please enter some ingredients to search for recipes.")
-    elif search_option == 'Food Name':
-        user_input = st.text_input('Enter a food name:')
-        if st.button('Find Recipes by Food Name'):
-            if user_input:
-                result = get_recipes_by_food_name(user_input)
-                display_recipes(result)
-            else:
-                st.write("Please enter a food name to search for recipes.")
-
-        
+# Function to display recommended recipes
 def display_recipes(recipes):
     if recipes.empty:
         st.write("No recipes found.")
@@ -62,9 +44,22 @@ def display_recipes(recipes):
             st.subheader(row['food_name'])
             st.write('Ingredients: ' + row['ingredients'])
             st.write('Instructions: ' + row['procedures'])
+            st.markdown('---')
 
+# Streamlit interface
+def main():
+    st.title('LET ME COOK')
+    st.header('Discover Delicious Nigerian Recipes')
 
+    user_input = st.text_input('Describe what you want to eat (e.g., "spicy rice with vegetables")')
+    if st.button('Recommend Recipes'):
+        if user_input:
+            recommended, scores = recommend_recipes(user_input, model, recipe_embeddings, recipes)
+            display_recipes(recommended)
+        else:
+            st.write("Please enter a description to get recommendations.")
 
+# Styling
 st.markdown("""
 <style>
     .stButton>button {
@@ -81,11 +76,10 @@ st.markdown("""
 </style>
 """, unsafe_allow_html=True)
 
-
 if __name__ == "__main__":
     main()
 
-
+# Footer
 st.markdown("""
 <style>
     .footer {
@@ -97,5 +91,6 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 st.markdown('<p class="footer">Made with ❤️ by Zainab</p>', unsafe_allow_html=True)
+
 
 
