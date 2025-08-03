@@ -1,13 +1,8 @@
 import streamlit as st
 import pandas as pd
-from sentence_transformers import SentenceTransformer
-from sklearn.metrics.pairwise import cosine_similarity
-import numpy as np
 
-# URL to the raw image content on GitHub
+# Image display
 image_url = 'https://raw.githubusercontent.com/zayneeh/LET-ME-COOK/main/20241021_212349.jpg'
-
-# Display the image in Streamlit
 st.image(image_url, caption='Nigerian Fried Rice', width=150)
 
 # Load the CSV data into a DataFrame
@@ -15,27 +10,35 @@ st.image(image_url, caption='Nigerian Fried Rice', width=150)
 def load_data(filename):
     data = pd.read_csv(filename)
     data.columns = [col.strip().lower() for col in data.columns]
-    data['combined_text'] = data['ingredients'] + ' ' + data['procedures']
     return data
 
-# Load embeddings
-@st.cache_data
-def load_embeddings(text_data):
-    model = SentenceTransformer('all-MiniLM-L6-v2')
-    embeddings = model.encode(text_data.tolist())
-    return model, embeddings
-
 recipes = load_data('Nigerian Palatable meals - Sheet1.csv')
-model, recipe_embeddings = load_embeddings(recipes['combined_text'])
 
-# Function to recommend recipes based on semantic similarity
-def recommend_recipes(user_input, model, embeddings, df, top_k=5):
-    user_embedding = model.encode([user_input])[0]
-    similarities = cosine_similarity([user_embedding], embeddings)[0]
-    top_indices = similarities.argsort()[-top_k:][::-1]
-    return df.iloc[top_indices], similarities[top_indices]
+# Function to recommend recipes based on ~90% ingredient match
+def get_recipes_by_ingredients(user_ingredients):
+    user_ingredients = [ingredient.strip().lower() for ingredient in user_ingredients.split(',')]
+    results = []
 
-# Function to display recommended recipes
+    for idx, row in recipes.iterrows():
+        recipe_ingredients = [i.strip().lower() for i in row['ingredients'].split(',')]
+        matched = [ing for ing in user_ingredients if ing in recipe_ingredients]
+
+        if len(user_ingredients) == 0:
+            continue
+
+        match_ratio = len(matched) / len(user_ingredients)
+
+        if match_ratio >= 0.9:
+            results.append(row)
+
+    return pd.DataFrame(results)
+
+# Function to search by food name
+def get_recipes_by_food_name(food_name):
+    food_name = [f.strip().lower() for f in food_name.split(',')]
+    return recipes[recipes['food_name'].apply(lambda x: all(f in x.lower() for f in food_name))]
+
+# Display recipes
 def display_recipes(recipes):
     if recipes.empty:
         st.write("No recipes found.")
@@ -46,18 +49,29 @@ def display_recipes(recipes):
             st.write('Instructions: ' + row['procedures'])
             st.markdown('---')
 
-# Streamlit interface
+# Streamlit UI
 def main():
     st.title('LET ME COOK')
     st.header('Discover Delicious Nigerian Recipes')
 
-    user_input = st.text_input('Describe what you want to eat (e.g., "spicy rice with vegetables")')
-    if st.button('Recommend Recipes'):
-        if user_input:
-            recommended, scores = recommend_recipes(user_input, model, recipe_embeddings, recipes)
-            display_recipes(recommended)
-        else:
-            st.write("Please enter a description to get recommendations.")
+    search_option = st.radio("Search by:", ('Ingredients', 'Food Name'))
+
+    if search_option == 'Ingredients':
+        user_input = st.text_input('Enter your ingredients, separated by commas:')
+        if st.button('Find Recipes by Ingredients'):
+            if user_input:
+                result = get_recipes_by_ingredients(user_input)
+                display_recipes(result)
+            else:
+                st.write("Please enter some ingredients.")
+    elif search_option == 'Food Name':
+        user_input = st.text_input('Enter a food name:')
+        if st.button('Find Recipes by Food Name'):
+            if user_input:
+                result = get_recipes_by_food_name(user_input)
+                display_recipes(result)
+            else:
+                st.write("Please enter a food name.")
 
 # Styling
 st.markdown("""
@@ -91,6 +105,3 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 st.markdown('<p class="footer">Made with ❤️ by Zainab</p>', unsafe_allow_html=True)
-
-
-
