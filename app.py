@@ -1,27 +1,35 @@
 import streamlit as st
 import pandas as pd
+from difflib import SequenceMatcher
 
-# Image display
+# Display the image
 image_url = 'https://raw.githubusercontent.com/zayneeh/LET-ME-COOK/main/20241021_212349.jpg'
 st.image(image_url, caption='Nigerian Fried Rice', width=150)
 
-# Load the CSV data into a DataFrame
+# Load data
 @st.cache_data
 def load_data(filename):
     data = pd.read_csv(filename)
     data.columns = [col.strip().lower() for col in data.columns]
     return data
 
-recipes = load_data('Nigerian Palatable meals - Sheet1.csv')
+recipes_df = load_data('Nigerian Palatable meals - Sheet1.csv')
 
-# Function to recommend recipes based on ~90% ingredient match
+# Fuzzy matching function
+def fuzzy_match(a, b):
+    return SequenceMatcher(None, a, b).ratio() >= 0.8
+
+# Ingredient-based recipe recommendation
 def get_recipes_by_ingredients(user_ingredients):
-    user_ingredients = [ingredient.strip().lower() for ingredient in user_ingredients.split(',')]
+    user_ingredients = [ing.strip().lower() for ing in user_ingredients.split(',') if ing.strip()]
     results = []
 
-    for idx, row in recipes.iterrows():
-        recipe_ingredients = [i.strip().lower() for i in row['ingredients'].split(',')]
-        matched = [ing for ing in user_ingredients if ing in recipe_ingredients]
+    for _, row in recipes_df.iterrows():
+        recipe_ings = [i.strip().lower() for i in row['ingredients'].split('\r\n') if i.strip()]
+        matched = []
+        for u_ing in user_ingredients:
+            if any(fuzzy_match(u_ing, recipe_ing) for recipe_ing in recipe_ings):
+                matched.append(u_ing)
 
         if len(user_ingredients) == 0:
             continue
@@ -33,10 +41,10 @@ def get_recipes_by_ingredients(user_ingredients):
 
     return pd.DataFrame(results)
 
-# Function to search by food name
+# Search by food name
 def get_recipes_by_food_name(food_name):
     food_name = [f.strip().lower() for f in food_name.split(',')]
-    return recipes[recipes['food_name'].apply(lambda x: all(f in x.lower() for f in food_name))]
+    return recipes_df[recipes_df['food_name'].apply(lambda x: all(f in x.lower() for f in food_name))]
 
 # Display recipes
 def display_recipes(recipes):
@@ -49,7 +57,7 @@ def display_recipes(recipes):
             st.write('Instructions: ' + row['procedures'])
             st.markdown('---')
 
-# Streamlit UI
+# Streamlit app interface
 def main():
     st.title('LET ME COOK')
     st.header('Discover Delicious Nigerian Recipes')
@@ -105,3 +113,4 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 st.markdown('<p class="footer">Made with ❤️ by Zainab</p>', unsafe_allow_html=True)
+
